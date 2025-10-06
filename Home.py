@@ -9,5 +9,5 @@ st.markdown(
     **Select the page from the sidebar** 
     - Check out our GitHub Repository
     - Cite Us!
-"""
+    """
 )
