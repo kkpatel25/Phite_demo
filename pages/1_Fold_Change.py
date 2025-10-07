@@ -162,7 +162,7 @@ def generateBar(plot_df, gene):
         # [0.001 - 0 ***)
         if row["padj"] < 0.05:
             if row["log2FC"] < 0:
-                y_position = row["log2FC"] - 0.3
+                y_position = row["log2FC"] - 0.1
             else:
                 y_position = row["log2FC"] + 0.1
 
@@ -231,5 +231,6 @@ def generateTable(plot_df, gene):
         margin=dict(t=40, l=20, r=20, b=20)
     )
     return fig_table
+
 
 app()
