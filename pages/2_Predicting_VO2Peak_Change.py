@@ -104,7 +104,7 @@ fig.update_layout(
     ],
 )
 
-fig.update_traces(marker=dict(size=12))
+fig.update_traces(marker=dict(size=10))
 
 st.plotly_chart(fig, use_container_width=True)
 col1, col2 = st.columns([2, 1])
