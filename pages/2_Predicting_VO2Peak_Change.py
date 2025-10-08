@@ -19,7 +19,7 @@ def render_result(col2, gene_dict):
         value = predict(gene_dict)
         st.markdown(
             f"""
-                    <div style="margin-top: 130px; font-size:20px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
+                    <div style="margin-top: 130px; font-size:18px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
                         Predicted VO2Peak change (ml/kg/min) after 12 weeks of training: {value:+.2f}
                     </div>
                     """,
@@ -111,7 +111,7 @@ col1, col2 = st.columns([2, 1])
 
 with col1:
     st.markdown(
-        "<p style='font-family: Source Sans; font-size: 20px;'>Insert normalized basal expression of each gene:</p>",
+        "<p style='font-family: Source Sans; font-size: 18px;'>Insert normalized basal expression of each gene:</p>",
         unsafe_allow_html = True )
     st.markdown(
         """

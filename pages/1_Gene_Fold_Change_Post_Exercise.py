@@ -26,7 +26,7 @@ def app():
     <style>
     div[class*="stTextInput"] label p {
         font: Source Sans;
-        font-size: 20px;
+        font-size: 18px;
     }
     </style>
     """
@@ -202,6 +202,11 @@ def generateBar(plot_df, gene):
         tickvals=plot_df["comparison"],
         tickfont=dict(size=12)
     )
+    fig.update_xaxes(linewidth=2, linecolor='rgb(231, 234, 240)', mirror=True,
+                     showline=True)
+
+    fig.update_yaxes(linewidth=2, linecolor='rgb(231, 234, 240)', mirror=True,
+                     showline=True)
 
     return fig
 
