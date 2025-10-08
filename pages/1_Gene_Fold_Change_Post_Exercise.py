@@ -33,15 +33,13 @@ def app():
 
     st.write(tabs_font_css, unsafe_allow_html=True)
 
-    gene_input = st.text_input("Type a gene name and enter:")
-
+    gene_input = st.text_input("Type a gene name and enter:", value = "PPARD")
 
     if "downloads_ready" not in st.session_state:
         st.session_state.downloads_ready = False
 
     if gene_input:
         gene_input = gene_input.strip().upper()
-
         if gene_input not in df["genesymbol"].values:
             st.error(f"{gene_input} is not a valid gene name. Please try again.")
         else:
@@ -55,7 +53,8 @@ def app():
             cols_to_plot = st.multiselect(
                 "**Select columns to display:**",
                 options=plot_df["comparison"].values,  # exclude 'Gene' column
-                default=plot_df["comparison"].values,
+                default=['w0h3_vs_w0pre', 'w0h24_vs_w0pre', 'w12pre_vs_w0pre',
+                         'w12h3_vs_w0pre', 'w12h24_vs_w0pre', 'w16rest_vs_w0pre'],
             )
 
             if "cols_to_plot" not in st.session_state:
