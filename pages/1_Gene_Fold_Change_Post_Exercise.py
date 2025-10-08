@@ -77,8 +77,8 @@ def app():
                 if not st.session_state.downloads_ready:
                     if st.button("Generate Download"):
                         st.session_state.downloads_ready = True
-                        st.session_state.figure_png = fig.to_image(format="png")
-                        st.session_state.figure_pdf = fig.to_image(format="pdf")
+                        st.session_state.figure_png = fig.to_image(format="png", engine="kaleido")
+                        st.session_state.figure_pdf = fig.to_image(format="pdf", engine="kaleido")
                         st.rerun()
                 else:
                     # its already cached
