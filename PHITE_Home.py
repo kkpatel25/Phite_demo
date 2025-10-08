@@ -17,8 +17,8 @@ st.markdown(
         color: black;
     ">
       <p>
-        This site is designed to help you explore and visualize data from the <strong>PHITE study</strong>.  
-        Use the <strong>sidebar</strong> to navigate through different pages and tools.
+        This site is designed to help you explore and visualize data from the <strong>PHITE study</strong>, which stands for stands for Precision High-Intensity Training Through Epigenetics and this longitudinal human acute- and long-term exercise trial was granted under the IRB-160512012. </p>  
+        <p> Use the <strong>sidebar</strong> to navigate through different pages and tools.
       </p>
       <ul>
         <li><a href="https://github.com/kkpatel25/Phite_demo" target="_blank"><strong>View our GitHub Repository</strong></a></li>
@@ -54,7 +54,7 @@ with col1:
             color: black;
         ">
           <p> <center>
-            This PHITE study was funded by ONR. 
+            This PHITE study was funded by Office of Naval Research (ONR). 
           </center> </p>
         </div>
         """,
@@ -62,7 +62,7 @@ with col1:
     )
     _, center, _ = st.columns(3)  # Creates three columns
     with center:
-        st.image("onr_logo.png", width =400)
+        st.image("onr_logo.png", width = 400)
 with col2:
     st.markdown(
         """
@@ -77,7 +77,9 @@ with col2:
             <strong> Developers: </strong> 
           </p>
           <p>
-          Krish Patel (kpate156@jh.edu) </p> <p>
+          Krish Patel (kpate156@jh.edu) </p> 
+          <p> Dr. Ron Evans (evans@salk.edu) </p>
+          <p>
           Dr. Tae Gyu Oh (taegyu-oh@ou.edu) </p>
           </center>
         </div>

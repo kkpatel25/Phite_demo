@@ -66,7 +66,9 @@ fig = px.scatter(
     x="Person",
     y="PowerPeak change (W/kg)",
     color="Type",
-    color_discrete_map={"Predicted": "blue", "Ground Truth": "red"},
+    color_discrete_map={"Predicted": "red", "Ground Truth": "blue"},
+    symbol="Type",
+    symbol_map={"Predicted": "square", "Ground Truth": "circle"}
 )
 
 fig.update_layout(
