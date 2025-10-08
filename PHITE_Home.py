@@ -17,7 +17,7 @@ st.markdown(
         color: black;
     ">
       <p>
-        This site is designed to help you explore and visualize data from the <strong>PHITE study</strong>, This site is designed to help you explore and visualize data from the PHITE study, which stands for stands for Precision High-Intensity Training Through Epigenetics. This longitudinal <strong>Human acute- and long-term exercise trial </strong>was granted under the IRB-160512012.  </p>  
+        This site is designed to help you explore and visualize data from the PHITE study, which stands for stands for Precision High-Intensity Training Through Epigenetics. This longitudinal <strong>Human acute- and long-term exercise trial </strong>was granted under the IRB-160512012.  </p>  
         <p> Use the <strong>sidebar</strong> to navigate through different pages and tools.
       </p>
       <ul>
