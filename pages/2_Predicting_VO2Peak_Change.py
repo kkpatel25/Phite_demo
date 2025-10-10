@@ -99,7 +99,7 @@ def generate_figure(df_melted, display = True):
             y=[round(st.session_state.vo2_value,2)],
             mode="markers",
             marker=dict(
-                size=25,
+                size=20,
                 color="green",
                 symbol="square"
             ),
