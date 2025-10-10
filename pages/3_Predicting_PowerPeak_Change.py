@@ -2,11 +2,20 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
+import numpy as np
 import sklearn
 
 @st.cache_data
 def load_model():
     return joblib.load("power_predict.joblib")
+
+@st.cache_data
+def load_stats():
+    return pd.read_csv(st.secrets["small_stats_url"])
+
+def generate_random(mean, std, min_val, max_val):
+    val = np.random.normal(mean, std)
+    return str(np.clip(val, min_val, max_val))
 
 def predict(gene_dict):
     loaded_model = load_model()
@@ -18,11 +27,14 @@ def render_result(col2, gene_dict):
         value = predict(gene_dict)
         st.markdown(
             f"""
-                    <div style="margin-top: 130px; font-size:18px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
-                        Predicted PowerPeak change (W/kg) after 12 weeks of training: {value:+.2f}
-                    </div>
-                    """,
-            unsafe_allow_html=True
+            <div style="margin-top: 130px; font-size:18px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
+                Predicted PowerPeak change (W/kg) after 12 weeks of training: 
+                <span style="font-size:24px; font-weight:bold; color:blue;">
+                    {value:+.2f} W/kg
+                </span>
+            </div>
+            """,
+        unsafe_allow_html=True
         )
 
 st.set_page_config(layout="wide")
@@ -136,8 +148,27 @@ with col1:
 
     with st.form("gene_input_form", clear_on_submit=False):
         gene_inputs = {}
+
+        if "gen_random_power" not in st.session_state:
+            st.session_state.gen_random_power = False
+
+        if "random_gene_vals" not in st.session_state:
+            st.session_state.random_gene_vals = {}  # store randoms here
+
+        df = load_stats()
+        df = df.set_index("Unnamed: 0")
+
         for g in genes:
-            gene_inputs[g] = st.text_input(g, value="")
+            if st.session_state.gen_random_power:
+                if g not in st.session_state.random_gene_vals:
+                    # Generate only once per gene
+                    row_df = df.loc[g]
+                    st.session_state.random_gene_vals[g] = generate_random(
+                        row_df["mean"], row_df["std"], row_df["min"], row_df["max"]
+                    )
+                gene_inputs[g] = st.text_input(g, value=st.session_state.random_gene_vals[g])
+            else:
+                gene_inputs[g] = st.text_input(g, value="")
 
         submitted = st.form_submit_button("Submit")
 
@@ -148,3 +179,13 @@ with col1:
                 st.success("Values successfully submitted!")
                 gene_dict_float = {k: float(v) for k, v in gene_inputs.items()}
                 render_result(col2, gene_dict_float)
+
+    if st.button("Generate Synthetic Values"):
+        st.session_state.gen_random_power = True
+        st.session_state.random_gene_vals = {}
+        st.rerun()
+
+    if st.button("Remove Synthetic Values"):
+        st.session_state.gen_random_power = False
+        st.session_state.random_gene_vals = {}
+        st.rerun()

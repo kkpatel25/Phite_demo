@@ -18,6 +18,10 @@ timepoint_labels = {
 def load_data():
     return pd.read_csv(st.secrets["data_url"])
 
+@st.cache_data
+def load_stats():
+    return pd.read_csv(st.secrets["stats_url"])
+
 
 def app():
     df = load_data()
@@ -109,6 +113,18 @@ def app():
 
             fig_table = generateTable(plot_df, gene_input)
             st.plotly_chart(fig_table, use_container_width=True)
+
+            stats_df = load_stats()
+            stats_df = stats_df.set_index("Unnamed: 0")
+
+            try:
+                stat_row = stats_df.loc[gene_input]
+                stat_table = generateStatsTable(stat_row, gene_input)
+                st.plotly_chart(stat_table, use_container_width=True)
+            except KeyError:
+                pass
+
+
 
 def process_df(gene, df):
     g = df[df["genesymbol"] == gene].squeeze()
@@ -238,6 +254,47 @@ def generateTable(plot_df, gene):
 
     fig_table.update_layout(
         title=f"Fold Change and Adjusted P-values for {gene}",
+        template="plotly_white",
+        margin=dict(t=40, l=20, r=20, b=20)
+    )
+    return fig_table
+
+
+def generateStatsTable(df, gene):
+
+    stats_values = [
+        f"{df['mean']:.2f}",
+        f"{df['min']:.2f}",
+        f"{df['max']:.2f}",
+        f"{df['std']:.2f}",
+        f"{df['vo2_corr']:+.2f}",
+        f"{df['power_corr']:+.2f}"
+    ]
+    stats_labels = ["Mean", "Min", "Max", "Standard Deviation", "Correlation with Vo2max Outcome (Week 12)", "Correlation with PowerPeak Outcome (Week 12)"]
+
+    fig_table = go.Figure(
+        data=[go.Table(
+            header=dict(
+                values=["Statistic", "Value"],
+                fill_color="#1f77b4",
+                align="center",
+                font=dict(color="white", size=15)
+            ),
+            cells=dict(
+                values=[stats_labels, stats_values],
+                fill_color=[
+                    ["#f9f9f9" if i % 2 == 0 else "#ffffff" for i in range(len(stats_labels))],
+                    ["#f9f9f9" if i % 2 == 0 else "#ffffff" for i in range(len(stats_values))]
+                ],
+                align="center",
+                font=dict(size=15),
+                height=30
+            )
+        )]
+    )
+
+    fig_table.update_layout(
+        title=f"Statistics for Week0 {gene} Expression",
         template="plotly_white",
         margin=dict(t=40, l=20, r=20, b=20)
     )
