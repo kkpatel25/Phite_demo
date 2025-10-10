@@ -294,7 +294,7 @@ def generateStatsTable(df, gene):
     )
 
     fig_table.update_layout(
-        title=f"Statistics for Week0 {gene} Expression",
+        title=f"Week 0 Baseline (w0pre) {gene} Expression",
         template="plotly_white",
         margin=dict(t=40, l=20, r=20, b=20)
     )

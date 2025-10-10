@@ -20,8 +20,10 @@ def predict(gene_dict):
 
 
 def render_result(col2, gene_dict):
+    value = predict(gene_dict)
+    st.session_state.vo2_value = value
+
     with col2:
-        value = predict(gene_dict)
         st.markdown(
             f"""
                     <div style="margin-top: 130px; font-size:18px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
@@ -34,18 +36,86 @@ def render_result(col2, gene_dict):
             unsafe_allow_html=True
         )
 
-
 def generate_random(mean, std, min_val, max_val):
-    val = np.random.normal(mean, std)
+    val = round(np.random.normal(mean, std),2)
     return str(np.clip(val, min_val, max_val))
+
+def generate_figure(df_melted, display = True):
+    fig = px.scatter(
+        df_melted,
+        x="Person",
+        y="VO2Peak change (ml/kg/min)",
+        color="Type",
+        color_discrete_map={"Predicted": "red", "Ground Truth": "blue"},
+        symbol="Type",
+        symbol_map={"Predicted": "square", "Ground Truth": "circle"}
+    )
+
+    fig.update_layout(
+        xaxis=dict(
+            title="",
+            showticklabels=False
+        ),
+        legend_title="",
+        legend=dict(
+            font=dict(size=15,
+                color='black',
+                family="Source Sans"
+            )
+        ),
+        margin=dict(l=20, r=20, t=30, b=20),
+        height=600,
+        annotations=[
+            dict(
+                x=1,  # far right
+                y=0,  # bottom
+                xref="paper",
+                yref="paper",
+                text="R² = 0.526",
+                showarrow=False,
+                font=dict(
+                    family="Source Sans",
+                    size=20,
+                    color="black"
+                ),
+                align="center",
+                xanchor="right",
+                yanchor="bottom",
+                bordercolor="black",
+                borderwidth=1,
+                borderpad=4,
+                bgcolor="rgba(217,217,214,0.8)",  # semi-transparent white
+                opacity=0.9
+            )
+        ],
+    )
+
+    fig.update_traces(marker=dict(size=10))
+
+
+    if "vo2_value" in st.session_state and not display:
+        fig.add_scatter(
+            x=[f"Your Prediction"],
+            y=[round(st.session_state.vo2_value,2)],
+            mode="markers",
+            marker=dict(
+                size=25,
+                color="green",
+                symbol="square"
+            ),
+            name="Your Prediction"
+        )
+    return fig
+
+
 
 st.set_page_config(layout="wide")
 
 predict_vals = [
-    0.3271350723, 0.5140979903, 0.9784933069, 5.146365909, -0.4403633775,
-    -1.774901452, 2.185483432, 2.281083054, 4.891635604, 4.006383688,
-    -0.2511161867, 6.115860855, 4.504438631, 9.11876205, 6.827807641,
-    6.918630304, 10.73728057
+    0.33, 0.51, 0.98, 5.15, -0.44,
+    -1.77, 2.19, 2.28, 4.89, 4.01,
+    -0.25, 6.12, 4.50, 9.12, 6.83,
+    6.92, 10.74
 ]
 
 target_vals = [
@@ -70,58 +140,11 @@ df_melted = df.melt(
     value_name="VO2Peak change (ml/kg/min)"
 )
 
-fig = px.scatter(
-    df_melted,
-    x="Person",
-    y="VO2Peak change (ml/kg/min)",
-    color="Type",
-    color_discrete_map={"Predicted": "red", "Ground Truth": "blue"},
-    symbol="Type",
-    symbol_map={"Predicted": "square", "Ground Truth": "circle"}
-)
+empty = st.empty()
 
-fig.update_layout(
-    xaxis=dict(
-        title="",
-        showticklabels=False
-    ),
-    legend_title="",
-    legend=dict(
-        font=dict(size=15,
-            color='black',
-            family="Source Sans"
-        )
-    ),
-    margin=dict(l=20, r=20, t=30, b=20),
-    height=600,
-    annotations=[
-        dict(
-            x=1,  # far right
-            y=0,  # bottom
-            xref="paper",
-            yref="paper",
-            text="R² = 0.526",
-            showarrow=False,
-            font=dict(
-                family="Source Sans",
-                size=20,
-                color="black"
-            ),
-            align="center",
-            xanchor="right",
-            yanchor="bottom",
-            bordercolor="black",
-            borderwidth=1,
-            borderpad=4,
-            bgcolor="rgba(217,217,214,0.8)",  # semi-transparent white
-            opacity=0.9
-        )
-    ],
-)
-
-fig.update_traces(marker=dict(size=10))
-
-st.plotly_chart(fig, use_container_width=True)
+fig = generate_figure(df_melted=df_melted)
+with empty:
+    st.plotly_chart(fig, use_container_width=True)
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -186,3 +209,8 @@ with col1:
         st.session_state.gen_random = False
         st.session_state.random_gene_vals = {}
         st.rerun()
+
+if "vo2_value" in st.session_state:
+    new_fig = generate_figure(df_melted, display = False)
+    with empty:
+        st.plotly_chart(new_fig, use_container_width=True)
