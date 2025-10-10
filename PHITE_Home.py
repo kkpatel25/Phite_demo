@@ -60,9 +60,9 @@ with col1:
         """,
         unsafe_allow_html=True
     )
-    _, center, _ = st.columns(3)  # Creates three columns
+    _, center, _ = st.columns([1, 3, 1])  # Creates three columns
     with center:
-        st.image("onr_logo.png", width = 400)
+        st.image("onr_logo.png", width=800)
 with col2:
     st.markdown(
         """
