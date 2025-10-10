@@ -122,9 +122,7 @@ def app():
                 stat_table = generateStatsTable(stat_row, gene_input)
                 st.plotly_chart(stat_table, use_container_width=True)
             except KeyError:
-                pass
-
-
+                st.error(f"{gene_input} is not a valid gene for the statistics dataframe.")
 
 def process_df(gene, df):
     g = df[df["genesymbol"] == gene].squeeze()
