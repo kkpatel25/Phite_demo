@@ -13,18 +13,16 @@ def load_model():
 def load_stats():
     return pd.read_csv(st.secrets["small_stats_url"])
 
-def generate_random(mean, std, min_val, max_val):
-    val = np.random.normal(mean, std)
-    return str(np.clip(val, min_val, max_val))
-
 def predict(gene_dict):
     loaded_model = load_model()
     df = pd.DataFrame([gene_dict], index=[0])
     return (loaded_model.predict(df))[-1]
 
 def render_result(col2, gene_dict):
+    value = predict(gene_dict)
+    st.session_state.power_value = value
+
     with col2:
-        value = predict(gene_dict)
         st.markdown(
             f"""
             <div style="margin-top: 130px; font-size:18px; font-weight:bold; color:black; padding:10px; border-radius:8px;">
@@ -34,8 +32,78 @@ def render_result(col2, gene_dict):
                 </span>
             </div>
             """,
-        unsafe_allow_html=True
+            unsafe_allow_html=True
         )
+
+def generate_random(mean, std, min_val, max_val):
+    val = round(np.random.normal(mean, std),2)
+    return str(np.clip(val, min_val, max_val))
+
+def generate_figure(df_melted, display = True):
+    fig = px.scatter(
+        df_melted,
+        x="Person",
+        y="PowerPeak change (W/kg)",
+        color="Type",
+        color_discrete_map={"Predicted": "red", "Ground Truth": "blue"},
+        symbol="Type",
+        symbol_map={"Predicted": "square", "Ground Truth": "circle"}
+    )
+
+    fig.update_layout(
+        xaxis=dict(
+            title="",
+            showticklabels=False
+        ),
+        legend_title="",
+        legend=dict(
+            font=dict(size=15,
+                color='black',
+                family="Source Sans"
+            )
+        ),
+        margin=dict(l=20, r=20, t=30, b=20),
+        height=600,
+        annotations=[
+            dict(
+                x=1,  # far right
+                y=0,  # bottom
+                xref="paper",
+                yref="paper",
+                text="R² = 0.483",
+                showarrow=False,
+                font=dict(
+                    family="Source Sans",
+                    size=20,
+                    color="black"
+                ),
+                align="center",
+                xanchor="right",
+                yanchor="bottom",
+                bordercolor="black",
+                borderwidth=1,
+                borderpad=4,
+                bgcolor="rgba(217,217,214,0.8)",  # semi-transparent white
+                opacity=0.9
+            )
+        ],
+    )
+
+    fig.update_traces(marker=dict(size=10))
+
+    if "power_value" in st.session_state and not display:
+        fig.add_scatter(
+            x=[f"Your Prediction"],
+            y=[round(st.session_state.power_value,2)],
+            mode="markers",
+            marker=dict(
+                size=20,
+                color="green",
+                symbol="square"
+            ),
+            name="Your Prediction"
+        )
+    return fig
 
 st.set_page_config(layout="wide")
 
@@ -73,73 +141,24 @@ df_melted = df.melt(
     value_name="PowerPeak change (W/kg)"
 )
 
-fig = px.scatter(
-    df_melted,
-    x="Person",
-    y="PowerPeak change (W/kg)",
-    color="Type",
-    color_discrete_map={"Predicted": "red", "Ground Truth": "blue"},
-    symbol="Type",
-    symbol_map={"Predicted": "square", "Ground Truth": "circle"}
-)
+empty = st.empty()
 
-fig.update_layout(
-    xaxis=dict(
-        title="",
-        showticklabels=False
-    ),
-    legend_title="",
-    legend=dict(
-        font=dict(
-            size=15,
-            color='black',
-            family="Source Sans"
-        )
-    ),
-    margin=dict(l=20, r=20, t=30, b=20),
-    height=600,
-    annotations=[
-        dict(
-            x=1,
-            y=0,
-            xref="paper",
-            yref="paper",
-            text="R² = 0.483",
-            showarrow=False,
-            font=dict(
-                family="Source Sans",
-                size=20,
-                color="black"
-            ),
-            align="center",
-            xanchor="right",
-            yanchor="bottom",
-            bordercolor="black",
-            borderwidth=1,
-            borderpad=4,
-            bgcolor="rgba(217,217,214,0.8)",
-            opacity=0.9
-        )
-    ],
-)
-
-fig.update_traces(marker=dict(size=10))
-
-st.plotly_chart(fig, use_container_width=True)
+fig = generate_figure(df_melted=df_melted)
+with empty:
+    st.plotly_chart(fig, use_container_width=True)
 col1, col2 = st.columns([2, 1])
 
 with col1:
     st.markdown(
         "<p style='font-family: Source Sans; font-size: 18px;'>Insert normalized basal expression of each gene:</p>",
-        unsafe_allow_html=True
-    )
+        unsafe_allow_html = True )
     st.markdown(
         """
         <style>
         /* Target the scroll-box container specifically */
         div[data-testid="stForm"] > div:nth-child(1) {
-            height: 300px;
-            overflow-y: auto;
+            height: 300px;      /* match plot height */
+            overflow-y: auto;   /* enable vertical scroll */
         }
         </style>
         """,
@@ -147,26 +166,27 @@ with col1:
     )
 
     with st.form("gene_input_form", clear_on_submit=False):
+        # All text inputs go here
         gene_inputs = {}
+        if "power_gen_random" not in st.session_state:
+            st.session_state.power_gen_random = False
 
-        if "gen_random_power" not in st.session_state:
-            st.session_state.gen_random_power = False
-
-        if "random_gene_vals" not in st.session_state:
-            st.session_state.random_gene_vals = {}  # store randoms here
+        if "power_random_gene_vals" not in st.session_state:
+            st.session_state.power_random_gene_vals = {}  # store randoms here
 
         df = load_stats()
         df = df.set_index("Unnamed: 0")
 
         for g in genes:
-            if st.session_state.gen_random_power:
-                if g not in st.session_state.random_gene_vals:
+            if st.session_state.power_gen_random:
+                if g not in st.session_state.power_random_gene_vals:
                     # Generate only once per gene
                     row_df = df.loc[g]
-                    st.session_state.random_gene_vals[g] = generate_random(
+                    st.session_state.power_random_gene_vals[g] = generate_random(
                         row_df["mean"], row_df["std"], row_df["min"], row_df["max"]
                     )
-                gene_inputs[g] = st.text_input(g, value=st.session_state.random_gene_vals[g])
+                gene_inputs[g] = st.text_input(g, value=st.session_state.power_random_gene_vals[g])
+
             else:
                 gene_inputs[g] = st.text_input(g, value="")
 
@@ -181,11 +201,16 @@ with col1:
                 render_result(col2, gene_dict_float)
 
     if st.button("Generate Synthetic Values"):
-        st.session_state.gen_random_power = True
-        st.session_state.random_gene_vals = {}
+        st.session_state.power_gen_random = True
+        st.session_state.power_random_gene_vals = {}
         st.rerun()
 
     if st.button("Remove Synthetic Values"):
-        st.session_state.gen_random_power = False
-        st.session_state.random_gene_vals = {}
+        st.session_state.power_gen_random = False
+        st.session_state.power_random_gene_vals = {}
         st.rerun()
+
+if "power_value" in st.session_state:
+    new_fig = generate_figure(df_melted, display = False)
+    with empty:
+        st.plotly_chart(new_fig, use_container_width=True)
