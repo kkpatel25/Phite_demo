@@ -55,6 +55,7 @@ def generate_figure(df_melted, display = True):
             title="",
             showticklabels=False
         ),
+        yaxis_title_font=dict(size=16),
         legend_title="",
         legend=dict(
             font=dict(size=15,
