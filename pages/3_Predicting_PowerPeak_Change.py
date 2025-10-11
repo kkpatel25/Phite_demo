@@ -5,6 +5,11 @@ import joblib
 import numpy as np
 import sklearn
 
+# for reasons unknown to me, this prevents scrolling up
+st.markdown(
+    "<span style='color:white;'>_</span>",
+    unsafe_allow_html=True
+)
 @st.cache_data
 def load_model():
     return joblib.load("power_predict.joblib")
@@ -199,7 +204,28 @@ with col1:
             else:
                 gene_inputs[g] = st.text_input(g, value="")
 
-        submitted = st.form_submit_button("Submit")
+        form1, form2, form3 = st.columns([1, 1, 1])
+
+        with form1:
+            submitted = st.form_submit_button("Submit")
+        with form2:
+            generate_syn = st.form_submit_button("Generate Values")
+        with form3:
+            remove_syn = st.form_submit_button("Remove Values")
+
+        if generate_syn:
+            st.session_state.power_gen_random = True
+            st.session_state.power_random_gene_vals = {}
+            if "power_value" in st.session_state:
+                st.session_state.pop("power_value")
+            st.rerun()
+
+        if remove_syn:
+            st.session_state.power_gen_random = False
+            st.session_state.power_random_gene_vals = {}
+            if "power_value" in st.session_state:
+                st.session_state.pop("power_value")
+            st.rerun()
 
         if submitted:
             if any(v.strip() == "" for v in gene_inputs.values()):
@@ -209,17 +235,7 @@ with col1:
                 gene_dict_float = {k: float(v) for k, v in gene_inputs.items()}
                 render_result(col2, gene_dict_float)
 
-    if st.button("Generate Synthetic Values"):
-        st.session_state.power_gen_random = True
-        st.session_state.power_random_gene_vals = {}
-        st.rerun()
-
-    if st.button("Remove Synthetic Values"):
-        st.session_state.power_gen_random = False
-        st.session_state.power_random_gene_vals = {}
-        st.rerun()
-
 if "power_value" in st.session_state:
-    new_fig = generate_figure(df_melted, display = False)
+    new_fig = generate_figure(df_melted, display=False)
     with empty:
         st.plotly_chart(new_fig, use_container_width=True)

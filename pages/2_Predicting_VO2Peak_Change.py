@@ -5,6 +5,12 @@ import joblib
 import numpy as np
 import sklearn
 
+# for reasons unknown to me, this prevents scrolling up
+st.markdown(
+    "<span style='color:white;'>_</span>",
+    unsafe_allow_html=True
+)
+
 @st.cache_data
 def load_model():
     return joblib.load("vo2_predict.joblib")
@@ -198,7 +204,14 @@ with col1:
             else:
                 gene_inputs[g] = st.text_input(g, value="")
 
-        submitted = st.form_submit_button("Submit")
+        form1, form2, form3 = st.columns([1,1,1])
+
+        with form1:
+            submitted = st.form_submit_button("Submit")
+        with form2:
+            generate_syn = st.form_submit_button("Generate Values")
+        with form3:
+            remove_syn = st.form_submit_button("Remove Values")
 
         if submitted:
             if any(v.strip() == "" for v in gene_inputs.values()):
@@ -207,17 +220,20 @@ with col1:
                 st.success("Values successfully submitted!")
                 gene_dict_float = {k: float(v) for k, v in gene_inputs.items()}
                 render_result(col2, gene_dict_float)
+        if generate_syn:
+            st.session_state.gen_random = True
+            st.session_state.random_gene_vals = {}
+            if "vo2_value" in st.session_state:
+                st.session_state.pop("vo2_value")
+            st.rerun()
 
+        if remove_syn:
+            st.session_state.gen_random = False
+            st.session_state.random_gene_vals = {}
+            if "vo2_value" in st.session_state:
+                st.session_state.pop("vo2_value")
+            st.rerun()
 
-    if st.button("Generate Synthetic Values"):
-        st.session_state.gen_random = True
-        st.session_state.random_gene_vals = {}
-        st.rerun()
-
-    if st.button("Remove Synthetic Values"):
-        st.session_state.gen_random = False
-        st.session_state.random_gene_vals = {}
-        st.rerun()
 
 if "vo2_value" in st.session_state:
     new_fig = generate_figure(df_melted, display = False)
