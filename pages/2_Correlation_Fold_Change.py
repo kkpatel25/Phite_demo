@@ -84,7 +84,7 @@ def generateTable(df, gene):
         "csa": "Myofibrils Size",
         "torque": "Strength (Peak Torque)",
         "contacts": "Vascular (contacts) Changes",
-        "vo2": "VO2max"
+        "vo2": "Vo2peak"
     }
 
     corr_values = [f"{df[f'{m}_corr']:+.2f}" for m in metrics]
