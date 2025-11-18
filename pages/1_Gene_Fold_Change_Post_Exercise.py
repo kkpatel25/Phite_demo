@@ -45,7 +45,7 @@ def app():
     if gene_input:
         gene_input = gene_input.strip().upper()
         if gene_input not in df["genesymbol"].values:
-            st.error(f"{gene_input} is not a valid gene name. Please try again.")
+            st.error(f"{gene_input} expression not detected. Please try again.")
         else:
             st.success(f"Gene {gene_input} found!")
 
@@ -265,10 +265,8 @@ def generateStatsTable(df, gene):
         f"{df['min']:.2f}",
         f"{df['max']:.2f}",
         f"{df['std']:.2f}",
-        f"{df['vo2_corr']:+.2f}",
-        f"{df['power_corr']:+.2f}"
     ]
-    stats_labels = ["Mean", "Min", "Max", "Standard Deviation", "Correlation with Vo2max Outcome (Week 12)", "Correlation with PowerPeak Outcome (Week 12)"]
+    stats_labels = ["Mean", "Min", "Max", "Standard Deviation"]
 
     fig_table = go.Figure(
         data=[go.Table(
